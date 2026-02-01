@@ -4,7 +4,7 @@ from io import BytesIO
 from datetime import datetime
 import os
 
-# --- FUNÇÃO PARA DATA EM PORTUGUÊS ---
+# --- FUNÇÃO PARA DATA EM PORTUGUÊS (FUNCIONA EM QUALQUER PC) ---
 def get_data_ptbr():
     meses = {
         1: "janeiro", 2: "fevereiro", 3: "março", 4: "abril",
@@ -14,6 +14,7 @@ def get_data_ptbr():
     hoje = datetime.now()
     return f"{hoje.day} de {meses[hoje.month]} de {hoje.year}"
 
+# --- CONFIGURAÇÃO VISUAL ---
 def add_bg():
     st.markdown(
          f"""
@@ -56,7 +57,7 @@ def check_password():
         try:
             senha_secreta = st.secrets["password"]
         except:
-            senha_secreta = "paralelepipedo" 
+            senha_secreta = "sead123" 
             
         if senha_digitada == senha_secreta:  
             st.session_state.password_correct = True
@@ -70,7 +71,7 @@ if not check_password():
 
 st.title("⚖️ Sistema de Pareceres CTA/SEAD")
 
-# 1. BANCO DE DADOS
+# 1. BANCO DE DADOS - PESSOAL
 lista_estagiarios = {
     "GUILHERME MOREIRA MEDEIROS": {"cargo": "Estagiário de Direito – CTA/SEAD"},
     "GERLANE CORREA DA SILVA": {"cargo": "Estagiária de Direito – CTA/SEAD"},
@@ -86,7 +87,7 @@ lista_assessores = {
     "MAURA SPOSITO ANTONY": {"cargo": "Assessora Jurídica – CTA/SEAD", "info": "OAB/AM n.º 6.624"}
 }
 
-# 2. HIERARQUIA
+# 2. HIERARQUIA E CARGOS
 oficiais_generico = ["Coronel", "Tenente-Coronel", "Major", "Capitão", "1º Tenente", "2º Tenente"]
 oficiais_saude = ["Major", "Capitão", "1º Tenente", "2º Tenente"]
 oficiais_saude_cb = ["Coronel", "Tenente-Coronel", "Major", "Capitão", "1º Tenente", "2º Tenente"]
@@ -175,7 +176,7 @@ locais_ses = {
     "Fundação de Vigilância em Saúde - FVS": "FVS"
 }
 
-# --- INTERFACE ---
+# --- INTERFACE GRÁFICA ---
 aba1, aba2, aba3 = st.tabs(["🏢 Instituição", "📝 Dados do Parecer", "🖋️ Assinaturas"])
 
 with aba1:
@@ -252,7 +253,7 @@ with aba3:
 
     st.markdown("---")
     
-    # --- SELEÇÃO DE MODELO INTELIGENTE ---
+    # --- LÓGICA DE SELEÇÃO DO MODELO WORD ---
     if orgao_sel == "SES":
         if quadro_sel == "Médicos":
             nome_modelo = "modelo_SES_MEDICO.docx"
@@ -270,6 +271,7 @@ with aba3:
 
     botao = st.button("🚀 GERAR PARECER", type="primary")
 
+# --- GERAÇÃO DO DOCUMENTO ---
 if botao:
     if not os.path.exists(caminho_modelo):
         st.error("Erro técnico: O arquivo de modelo não está na pasta.")
@@ -321,7 +323,7 @@ if botao:
                     elif "35%" in sel_porc: alinea_medico = "c"
                     else: alinea_medico = "a"
                 
-                # >>> GERAÇÃO DO RICHTEXT
+                # >>> GERAÇÃO DO RICHTEXT (Negrito na Alínea Correta)
                 rt = RichText()
                 if "25%" in sel_porc: rt.add(f"{txt_a} [grifo nosso]\n", font='Arial', bold=True)
                 else: rt.add(f"{txt_a}\n", font='Arial')
@@ -352,6 +354,7 @@ if botao:
                 rt_ident = RichText()
                 rt_ident.add("Ressalte-se, por oportuno, que a efetiva concessão e a consequente implementação "
                              "financeira da Gratificação de Curso encontram-se igualmente condicionadas à imprescindível ", font='Arial', size=20)
+                # Usa a tag termo_do_servidor
                 rt_ident.add(f"juntada de cópia legível do documento de identidade oficial {termo_do_servidor}", font='Arial', size=20, bold=True)
                 rt_ident.add(" aos autos, providência que se configura como requisito formal indispensável para a correta qualificação "
                              "do interessado e para a segurança jurídica do ato administrativo, devendo tais pendências serem saneadas "
@@ -377,11 +380,8 @@ if botao:
                 "PORCENTAGEM": texto_porcentagem,
                 "CITACAO_LEI": citacao_lei_formatada,
                 "TIPO_POS": tipo_pos_graduacao,
-                
-                # Tags RichText atualizadas
                 "CONDICAO_LEGITIMIDADE": txt_cond_legitimidade,
                 "CONDICAO_IDENTIDADE": txt_cond_identidade,
-                
                 "RESUMO_DCT": resumo, "EU": sel_est, 
                 "MEU_CARGO": lista_estagiarios[sel_est]["cargo"],
                 "ASSINANTE_DIREITA": sel_ass, 
@@ -396,7 +396,25 @@ if botao:
             buf = BytesIO()
             doc.save(buf)
             buf.seek(0)
+            
+            # --- NOME DO ARQUIVO PERSONALIZADO ---
+            # 1. Trata o Número do Parecer (Se vazio, vira XXX)
+            num_arq = num_parecer if num_parecer.strip() else "XXX"
+            
+            # 2. Trata o Processo (Troca / por -)
+            proc_limpo = proc.replace("/", "-").replace("\\", "-")
+            
+            # 3. Trata a Sigla (Usa a lotação para SES ou o Órgão para os outros)
+            if orgao_sel == "SES" and sigla_lotacao:
+                sigla_arq = sigla_lotacao
+            else:
+                sigla_arq = orgao_sel
+            
+            # 4. Monta o Nome Final
+            nome_arquivo = f"Parecer nº {num_arq}.{ano_parecer}-Proc.nº {proc_limpo} ({sigla_arq})- {nome} (Grat. de Curso).docx"
+            
             st.success(f"Parecer de {nome} gerado com sucesso!")
-            st.download_button("📥 Baixar Parecer", buf, f"Parecer_{orgao_sel}_{nome}.docx")
+            st.download_button("📥 Baixar Parecer", buf, nome_arquivo)
+            
         except Exception as e:
             st.error(f"Erro: {e}")
