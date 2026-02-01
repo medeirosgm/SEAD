@@ -57,7 +57,7 @@ def check_password():
         try:
             senha_secreta = st.secrets["password"]
         except:
-            senha_secreta = "sead123" 
+            senha_secreta = "paralelepipedo" 
             
         if senha_digitada == senha_secreta:  
             st.session_state.password_correct = True
