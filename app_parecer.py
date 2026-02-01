@@ -124,7 +124,7 @@ hierarquia_postos = {
         "Praças Combatentes": {p: p for p in pracas_lista},
         "Praças Complementares": {p: p for p in pracas_lista}
     },
-    "PCAM": {
+    "PCAM (Em teste)": {
         "Servidores": {"Delegado": "Delegado", "Investigador": "Investigador", "Escrivão": "Escrivão", "Perito": "Perito"}
     },
     "SES": {
@@ -427,3 +427,4 @@ if botao:
         except Exception as e:
 
             st.error(f"Erro: {e}")
+
