@@ -151,7 +151,7 @@ nomes_quadros_extenso = {
         "Praças Combatentes": "Quadro de Praças Combatentes",
         "Praças Complementares": "Quadro Complementar de Praças"
     },
-    "PCAM": {
+    "PCAM (Em teste)": {
         "Servidores": "Quadro de Servidores da Polícia Civil"
     },
     "SES": {
@@ -425,4 +425,5 @@ if botao:
             st.download_button("📥 Baixar Parecer", buf, nome_arquivo)
             
         except Exception as e:
+
             st.error(f"Erro: {e}")
