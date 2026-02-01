@@ -214,8 +214,11 @@ with aba2:
         curso = st.text_input("Nome do Curso (Ex: Saúde Pública):")
     with col_car: 
         carga = st.text_input("Carga Horária (Ex: 408h):")
-
-    superior_pertinencia = st.text_input("Quem atestou a pertinência? (Ex: Diretora de Vigilância Hospitalar):")
+    
+    # --- AJUSTE: Pertinência removida para PMAM e CBMAM ---
+    superior_pertinencia = ""
+    if orgao_sel not in ["PMAM", "CBMAM"]:
+        superior_pertinencia = st.text_input("Quem atestou a pertinência? (Ex: Diretora de Vigilância Hospitalar):")
 
     col_data, col_porc = st.columns(2)
     with col_data:
@@ -237,12 +240,17 @@ with aba2:
         termo_requerente = "a requerente"
         termo_do_servidor = "da servidora"
     
-    st.markdown("##### ⚠️ Condicionantes do Parecer")
-    c_legit = st.checkbox("Condicionar Legitimidade? (Certificado/Histórico)")
-    c_ident = st.checkbox("Juntar documento de identidade?")
+    # --- AJUSTE: Condicionantes removidas para PMAM e CBMAM ---
+    c_legit = False
+    c_ident = False
+    if orgao_sel not in ["PMAM", "CBMAM"]:
+        st.markdown("##### ⚠️ Condicionantes do Parecer")
+        c_legit = st.checkbox("Condicionar Legitimidade? (Certificado/Histórico)")
+        c_ident = st.checkbox("Juntar documento de identidade?")
 
+    # --- AJUSTE: Conclusão removida para SES e CBMAM (Fica só PMAM e PCAM) ---
     resumo = "" 
-    if orgao_sel != "SES":
+    if orgao_sel not in ["SES", "CBMAM"]:
         resumo = st.text_area("Conclusão Técnica (Recuo 4cm):", height=150)
 
 with aba3:
